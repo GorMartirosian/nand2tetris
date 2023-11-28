@@ -1,9 +1,10 @@
 package main.assembler;
 
+import main.assembler.exception.CompileTimeException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import custom_exceptions.CompileTimeException;
+
 public class Parser {
     BufferedReader reader;
     String currentInstruction;

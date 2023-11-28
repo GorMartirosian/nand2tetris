@@ -1,0 +1,148 @@
+class Math{
+	static int INTEGER_LENGTH;
+	static int CHAR_LENGTH;
+	static int INTEGER_MIN;
+	static int INTEGER_MAX;
+	//two's powers [1,2,4,8,...,-32768] last has overflown
+	static Array twoToThe;
+	
+	function void init(){
+		
+
+		let INTEGER_LENGTH = 16;
+		let CHAR_LENGTH = 16;
+		let INTEGER_MIN = -32767 - 1;
+		let INTEGER_MAX = 32767;
+		do Math.initPowers();
+
+		return;
+	}
+	function void initPowers(){
+		var int twoPow;
+		var int i;
+		
+		let twoToThe = Array.new(16);
+		let twoPow = 1;
+		let i = 0;
+		
+		// 16 is the length of twoToThe
+		while(i < 16){
+			let twoToThe[i] = twoPow;
+			let twoPow = twoPow + twoPow;
+			let i = i + 1;
+		}
+		
+		return;
+	}
+	
+	function int multiply(int x, int y){
+		var int result;
+		var int i;
+		
+		let result = 0;
+		let i = 0;
+		
+		while(i < INTEGER_LENGTH){
+			if(Math.bitAt(x, i) = 1){
+				let result = result + y;
+			}
+			let y = y + y;
+			let i = i + 1;
+		}
+
+		return result;
+			
+	}
+	
+    /** Returns the integer part of x/y. */
+    function int divide(int x, int y) 
+    {
+        if (y = 0)
+        {
+            do Sys.error(3);
+        }
+        
+        if ( ((x < 0) & (y > 0)) | ((x > 0) & (y < 0)) )
+        {
+            return -Math.recDivide(Math.abs(x), Math.abs(y));
+        }
+        return Math.recDivide(Math.abs(x), Math.abs(y));
+    }
+
+     /**
+     * A recursive division algorithm.
+     * Assumes a,y are positive.
+     */
+    function int recDivide(int x, int y)
+    {
+        var int q;
+        if ((y > x) | (y < 0))
+        {
+            return 0;
+        }
+        
+        let q = Math.recDivide(x, y + y);
+        if ( (x- ((q + q) * y)) < y)
+        {
+            return q + q;
+        }
+        else
+        {
+            return (q + q) + 1;
+        }
+    }
+
+	//overflows in case of -32768
+	function int abs(int x){
+		if(x < 0){
+			return -x;
+		}
+		return x;
+	}
+
+	//gets the bit at index starting from right end(counting from 0)
+	function int bitAt(int x, int index){
+		var int bit;
+		let bit = x & twoToThe[index];
+		if(~(bit = 0)){
+			return 1;
+		}
+		return 0;
+	}
+
+	function int sqrt(int x){
+		var int y;
+		var int i;
+		var int square;
+		
+		
+		let y = 0; 
+		let i = 8;
+		
+	
+		while(i > -1){
+			let square = (y + twoToThe[i]) * (y + twoToThe[i]);
+			if(~( square > x) & (square > 0)){
+				let y = y + twoToThe[i];
+			}
+		}
+		return y;
+		
+	}
+
+    function int max(int a, int b){
+        if (b > a)
+        {
+            return b;
+        }
+        return a;
+    }
+
+    function int min(int a, int b){
+        if (b < a)
+        {
+            return b;        
+        }
+        return a;
+    }
+}

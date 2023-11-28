@@ -1,0 +1,132 @@
+class Memory{
+	static Array RAM;
+	static Array heapBase; // heap base pointer
+	static Array freeList; // free list init
+
+	function void init(){
+		let RAM = 0;
+		let heapBase = 2048;
+		let freeList = heapBase;
+		//next freeList node pointer
+		let freeList[0] = 0;
+		//initial size is (16383 - 2048 + 1) - 2
+		let freeList[1] = 14334;
+		
+		return;
+	}
+
+	function Array alloc(int size){
+		var Array allocSeg;
+		
+		let allocSeg = Memory.bestFit(size);
+		if(allocSeg = -1){
+			do Sys.error(1); // NO MEMORY LEFT!
+		} 
+		//sets the size field for future deAlloc call
+		let allocSeg[-1] = size;
+		return allocSeg;
+	}
+	
+	function void deAlloc(Array obj){
+		//set's segment pointer to the start of the freeList
+		let obj[-2] = freeList;
+		freeList = obj - 2;
+		return;
+	}
+
+	/** Best Fitted Node, but without returning the extra space back to the FreeList
+	*	returns -1 if no segment is found
+	*/
+	function Array bestFit(int size){
+		var Array bestFittedNode;
+		var Array firstAppropriateNode;
+		var Array lastCellOfSegment;
+		var Array allocPtr;
+		
+		//find one segment that matches
+		let firstAppropriateNode = Memory.findFirstAppropriate(size);
+
+		// if no appropriate segment is found
+		if(firstAppropriateNode = -1){ 
+			return -1;
+		}
+		
+            // find best fitted		
+		let bestFittedNode = Memory.bestFitNode(size, firstAppropriateNode);
+
+		// extract best fitted piece from freeList
+		do extractNodeFromFreeList(bestFittedNode);
+		
+		let lastCellOfSegment = bestFittedNode + bestFittedNode[1] + 1;
+		let allocPtr = lastCellOfSegment - size + 1;
+		
+		let bestFittedNode[1] = bestFittedNode[1] - (size + 2);
+		//append the remaining of the segment to the front of freeList
+		do Memory.appendFrontFreeList(bestFittedNode);
+	
+		return allocPtr;
+	}
+
+	function void appendFrontFreeList(Array seg){
+		if(seg[1] > 0){
+			let seg[0] = freeList;
+			let freeList = seg;
+		}
+		return;
+	}
+
+	function void extractNodeFromFreeList(Array listNode){
+		var Array iteratorListNode;
+		let iteratorListNode = freeList;
+		
+		
+		while(~(iteratorListNode = 0)){
+			if(iteratorListNode[0] = listNode){
+				iteratorListNode[0] = listNode[0];
+			}
+			let iteratorListNode = iteratorListNode[0];
+		}
+		return; 
+	}
+
+	//if returned -1, no occurrence of block <size> is found
+	function Array findFirstAppropriate(int size){
+		var Array iteratorListNode;
+		var Array firstFittedNode;
+
+		let iteratorListNode = freeList;
+		let firstFittedNode = -1;
+
+		//find one segment that matches
+		while(~(iteratorListNode = 0)){
+			if(~(iteratorListNode[1] < size + 2)){
+				let firstFittedNode = iteratorListNode;
+			}
+			let iteratorListNode = iteratorListNode[0];
+		}
+		
+		return firstFittedNode;
+	}
+
+	function Array bestFitNode(int size, Array firstOccurrence){
+		var Array iteratorListNode;
+		let iteratorListNode = freeList;
+		
+		while(~(iteratorListNode = 0)){
+			if(~(iteratorListNode[1] < size + 2) & iteratorListNode[1] < firstOccurrence[1]){
+				let firstOccurrence = iteratorListNode;
+			}
+			let iteratorListNode = iteratorListNode[0];
+		}
+		return firstOccurrence;
+	}
+
+
+	function int peek(int address){
+		return RAM[address];
+	}
+	function void poke(int address, int value){
+		let RAM[address] = value;
+		return;
+	}
+}
